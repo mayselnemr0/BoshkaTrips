@@ -1,0 +1,962 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Boshka Trips</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy:#0B2942;
+    --teal:#0E4F5C;
+    --aqua:#1FB6C9;
+    --sand:#F7F5EF;
+    --gold:#C9A24B;
+    --ink:#13202B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    font-family:'Manrope', sans-serif;
+    color:var(--ink);
+    background:var(--sand);
+    line-height:1.5;
+    position:relative;
+  }
+  :focus-visible{outline:3px solid var(--aqua); outline-offset:3px;}
+  .skip-link{position:absolute; left:12px; top:-48px; z-index:500; background:var(--navy); color:#fff; padding:10px 14px; border-radius:0 0 8px 8px; font-size:13px; font-weight:700; transition:top .2s;}
+  .skip-link:focus{top:0;}
+  .grain{
+    position:fixed; inset:0; z-index:0; pointer-events:none;
+    opacity:0.03; mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  a{color:inherit; text-decoration:none;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .ar{font-family:'Manrope', sans-serif; direction:rtl; unicode-bidi:isolate;}
+
+  @keyframes riseIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  .avatar-wrap{animation:riseIn .7s cubic-bezier(.2,.7,.2,1) both;}
+  h1{animation:riseIn .7s .08s cubic-bezier(.2,.7,.2,1) both;}
+  .bio{animation:riseIn .7s .14s cubic-bezier(.2,.7,.2,1) both;}
+  .quick-actions{animation:riseIn .7s .2s cubic-bezier(.2,.7,.2,1) both;}
+
+  @media (prefers-reduced-motion: reduce){
+    .avatar-ring, .avatar, .avatar-wrap, h1, .bio, .quick-actions{animation:none !important;}
+  }
+
+  .page{position:relative; z-index:1; max-width:560px; margin:0 auto; padding:64px 20px 60px;}
+  .atmosphere{
+    position:fixed; top:0; left:0; right:0; height:520px; z-index:0; pointer-events:none;
+    background:radial-gradient(circle at 50% -10%, rgba(31,182,201,0.16), transparent 55%),
+               radial-gradient(circle at 85% 10%, rgba(201,162,75,0.12), transparent 50%);
+  }
+
+  .avatar-wrap{position:relative; width:132px; height:132px; margin:0 auto 24px;}
+  .avatar-ring{
+    position:absolute; inset:-7px; border-radius:50%;
+    background:conic-gradient(from 0deg, var(--aqua), var(--gold), var(--teal), var(--aqua));
+    animation:ringSpin 14s linear infinite;
+    opacity:0.85;
+  }
+  .avatar-ring::after{content:""; position:absolute; inset:3px; border-radius:50%; background:var(--sand);}
+  @keyframes ringSpin{ to{ transform:rotate(360deg); } }
+  .avatar{
+    position:absolute; inset:0; border-radius:50%;
+    background:radial-gradient(circle at 32% 28%, #14707f, var(--navy) 72%);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 16px 40px rgba(11,41,66,0.32), inset 0 0 0 1px rgba(247,245,239,0.08);
+    animation:avatarFloat 6s ease-in-out infinite;
+  }
+  @keyframes avatarFloat{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-5px);} }
+  .avatar svg{width:56px; height:56px;}
+
+  h1{
+    font-family:'Fraunces', serif; font-weight:700; text-align:center;
+    font-size:34px; color:var(--navy); letter-spacing:-0.01em; margin-bottom:6px;
+    display:flex; align-items:baseline; justify-content:center; gap:9px;
+  }
+  h1 em{font-style:italic; font-weight:500; color:var(--teal); position:relative;}
+  h1 em::after{
+    content:""; position:absolute; left:2px; right:2px; bottom:2px; height:2px;
+    background:linear-gradient(90deg, var(--gold), transparent);
+  }
+  .bio{
+    text-align:center; font-size:14px; color:#4b5a63; max-width:380px;
+    margin:0 auto 28px; line-height:1.6;
+  }
+  .bio b{color:var(--teal);}
+
+  .quick-actions{display:flex; gap:10px; margin-bottom:40px;}
+  .qa-btn{
+    flex:1; text-align:center; padding:14px 12px; border-radius:14px;
+    font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:0.03em;
+    transition:transform .2s, box-shadow .2s;
+  }
+  .qa-btn:hover{transform:translateY(-2px);}
+  .qa-btn:active,.link-btn:active{transform:scale(.985);}
+  .qa-primary{background:var(--navy); color:var(--sand); box-shadow:0 10px 24px rgba(11,41,66,0.2);}
+  .qa-secondary{background:#fff; color:var(--navy); border:1px solid rgba(11,41,66,0.15);}
+  .featured-offer{display:block; position:relative; min-height:246px; margin:0 4px 43px; overflow:hidden; border-radius:12px; color:#fff; background:#0a1b2a center/cover no-repeat; box-shadow:0 19px 40px rgba(10,27,42,.25); isolation:isolate;}
+  .featured-offer::before{content:""; position:absolute; inset:0; background:linear-gradient(115deg,rgba(6,19,30,.9) 4%,rgba(10,27,42,.42) 65%,rgba(10,27,42,.12)); z-index:-1;}
+  .featured-offer::after{content:"↗"; position:absolute; right:20px; bottom:19px; width:42px; height:42px; display:grid; place-items:center; border:1px solid rgba(244,239,231,.75); border-radius:50%; color:#f4efe7; font-size:20px; transition:.2s;}
+  .featured-offer:hover::after{background:#b8954c; border-color:#b8954c; transform:translate(2px,-2px);}
+  .featured-copy{position:absolute; left:22px; right:72px; bottom:22px;}.featured-kicker{display:block; margin-bottom:9px; color:#f0d594; font:500 9px/1 'IBM Plex Mono',monospace; letter-spacing:.15em; text-transform:uppercase;}.featured-title{display:block; font:600 28px/.98 'Fraunces',serif; letter-spacing:-.035em;}.featured-title .ar{display:block; margin-top:7px; font:500 17px/1.1 'Manrope',sans-serif; color:#f8edd0;}.featured-note{display:block; margin-top:10px; font-size:11px; color:rgba(255,255,255,.78);}
+
+  .section-label{
+    display:flex; align-items:center; gap:10px; margin:36px 0 14px;
+    font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:0.12em;
+    text-transform:uppercase; color:var(--teal); font-weight:500;
+  }
+  .section-label::after{content:""; flex:1; height:1px; background:rgba(14,79,92,0.2);}
+  .section-label:first-of-type{margin-top:0;}
+
+  .link-btn{
+    display:flex; flex-direction:column; gap:3px; width:100%;
+    background:#fff; border:1px solid rgba(11,41,66,0.08); border-left:3px solid var(--aqua); border-radius:14px;
+    padding:16px 18px; margin-bottom:10px;
+    transition:transform .2s cubic-bezier(.2,.7,.2,1), box-shadow .2s ease, border-color .2s ease;
+  }
+  #dayuseList .link-btn{border-left-color:var(--gold);}
+  .link-btn:hover{transform:translateY(-2px) scale(1.005); box-shadow:0 14px 30px rgba(11,41,66,0.1); border-color:rgba(31,182,201,0.35);}
+  .lb-title{font-weight:700; font-size:15.5px; color:var(--navy);}
+  .lb-sub{font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:#7a8890; letter-spacing:0.02em;}
+  .lb-badge{
+    display:inline-block; margin-left:8px; font-size:10px; padding:2px 8px; border-radius:20px;
+    background:rgba(31,182,201,0.14); color:var(--teal); font-weight:700; text-transform:uppercase; letter-spacing:0.03em; vertical-align:middle;
+  }
+  .lb-badge.limited{background:rgba(201,162,75,0.18); color:#8a6a2e;}
+  .lb-badge.full{background:rgba(194,74,74,0.14); color:#a13a3a;}
+
+  .link-btn.accent{
+    background:linear-gradient(135deg, var(--teal), var(--navy)); border:none;
+  }
+  .link-btn.accent .lb-title{color:var(--sand); font-size:16.5px;}
+  .link-btn.accent .lb-sub{color:rgba(247,245,239,0.75);}
+  .private-cta{width:100%; border:0; text-align:left; cursor:pointer; min-height:132px; padding:26px 68px 26px 23px; background:linear-gradient(125deg,#092034,#14616a);}
+  .private-cta .lb-title{font-size:23px; line-height:1.05;}.private-cta .lb-sub{margin-top:9px; line-height:1.45;}.private-cta .private-kicker{display:block; margin-bottom:9px; color:#f0d594; font:500 10px 'IBM Plex Mono',monospace; letter-spacing:.13em; text-transform:uppercase;}
+  .private-cta::before{content:'✦';position:absolute;right:27px;top:23px;color:#edce83;font-size:21px;}.private-cta::after{width:46px;height:46px;right:22px;bottom:22px;}
+  .private-overlay{position:fixed;inset:0;background:rgba(7,24,34,.84);z-index:225;display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}.private-overlay.open{display:flex;}.private-panel{position:relative;width:min(100%,490px);background:#f7f3ec;border-radius:14px;padding:29px 26px;box-shadow:0 28px 80px rgba(0,0,0,.36);}.private-panel h3{font:600 29px/1.02 'Fraunces',serif;color:var(--navy);letter-spacing:-.035em;margin:3px 0 7px;}.private-panel .private-intro{font-size:13px;color:#647078;margin-bottom:21px;}.private-close{position:absolute;right:15px;top:12px;width:32px;height:32px;border:0;border-radius:50%;background:#e9e2d6;color:#183142;font-size:22px;cursor:pointer;}.private-form{display:grid;gap:12px;}.private-form label{display:grid;gap:5px;font-size:11px;font-weight:700;letter-spacing:.04em;color:#63716e;text-transform:uppercase;}.private-form input,.private-form select{min-height:46px;padding:10px 12px;border:1px solid #d7d2c8;border-radius:7px;background:#fff;color:var(--ink);font:14px 'Manrope',sans-serif;}.price-preview{padding:12px 14px;border-radius:8px;background:#e7f0ed;border-left:3px solid #b8954c;color:#164b52;font-size:13px;}.price-preview b{font-family:'Fraunces',serif;font-size:17px;}.private-submit{border:0;border-radius:8px;background:linear-gradient(125deg,#0a1b2a,#164b52);color:#fff;padding:16px;font:700 12px 'Manrope',sans-serif;letter-spacing:.07em;text-transform:uppercase;cursor:pointer;box-shadow:0 12px 22px rgba(10,27,42,.18);}.private-submit span{margin-left:7px;color:#f0d594;font-size:17px;}
+
+  .link-btn.has-photo{flex-direction:row; align-items:center; gap:14px; padding:12px 14px;}
+  .lb-thumb{width:60px; height:60px; border-radius:10px; background-size:cover; background-position:center; flex-shrink:0;}
+  .lb-text{display:flex; flex-direction:column; gap:3px; flex:1; min-width:0; padding:0;}
+
+  .empty-note{font-size:13px; color:#8a97a0; padding:6px 2px 14px;}
+
+  /* TRIP DETAIL MODAL */
+  .detail-overlay{position:fixed; inset:0; background:rgba(11,41,66,0.85); z-index:220; display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:32px 16px;}
+  .detail-overlay.open{display:flex;}
+  .detail-panel{background:#fff; width:100%; max-width:480px; border-radius:16px; overflow:hidden;}
+  .detail-gallery{width:100%; height:200px; display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; background:var(--teal);}
+  .detail-gallery img{flex:0 0 100%; width:100%; height:200px; object-fit:cover; scroll-snap-align:start;}
+  .detail-gallery.empty{background:linear-gradient(135deg, var(--teal), var(--aqua)); position:relative;}
+  .detail-close{position:absolute; top:12px; right:12px; width:34px; height:34px; border-radius:50%; background:rgba(11,41,66,0.6); color:#fff; border:none; font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:2;}
+  .detail-body{padding:22px 24px 26px;}
+  .detail-body h3{font-family:'Fraunces',serif; font-size:22px; color:var(--navy); margin-bottom:4px;}
+  .detail-body .dsub{font-family:'IBM Plex Mono',monospace; font-size:12px; color:#7a8890; margin-bottom:18px;}
+  .detail-itin{list-style:none; margin-bottom:20px;}
+  .detail-itin li{display:flex; gap:10px; padding:9px 0; border-top:1px solid #f0eee8; font-size:13.5px; color:#3d4a52;}
+  .detail-itin li:first-child{border-top:none;}
+  .detail-itin .di-day{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--aqua); font-weight:700; flex-shrink:0; padding-top:1px;}
+
+  footer{margin-top:52px; text-align:center;}
+  .foot-brand{font-family:'Fraunces',serif; font-weight:600; font-size:18px; color:var(--navy); margin-bottom:6px;}
+  .foot-brand span{color:var(--aqua);}
+  footer p{font-size:12px; color:#8a97a0; margin-bottom:14px;}
+  footer button{background:none; border:none; color:#a7b0b7; font-size:12px; cursor:pointer; text-decoration:underline;}
+
+  /* ADMIN (reused pattern) */
+  .admin-overlay{position:fixed; inset:0; background:rgba(11,41,66,0.85); z-index:200; display:none; align-items:flex-start; justify-content:center; overflow-y:auto; padding:40px 16px;}
+  .admin-overlay.open{display:flex;}
+  .admin-panel{background:#fff; width:100%; max-width:560px; padding:28px; border-radius:14px;}
+  .admin-panel h2{font-size:20px; margin-bottom:4px; font-family:'Fraunces',serif;}
+  .admin-panel .sub{color:#7a8890; font-size:13px; margin-bottom:20px;}
+  .admin-close{float:right; background:none; border:none; font-size:22px; cursor:pointer; color:#4b5a63;}
+  .admin-tabs{display:flex; gap:6px; margin-bottom:20px; border-bottom:1px solid #eee; overflow-x:auto;}
+  .admin-tab{padding:9px 14px; font-size:12.5px; font-weight:700; cursor:pointer; border-bottom:2px solid transparent; color:#7a8890; white-space:nowrap;}
+  .admin-tab.active{color:var(--teal); border-bottom-color:var(--teal);}
+  .admin-tabpane{display:none;}
+  .admin-tabpane.active{display:block;}
+  .admin-item{border:1px solid #eee; padding:12px; margin-bottom:8px; border-radius:10px; display:flex; justify-content:space-between; align-items:center; gap:10px; font-size:12.5px;}
+  .admin-item button{background:#C24A4A; color:#fff; border:none; padding:6px 10px; font-size:10.5px; border-radius:6px; cursor:pointer; text-transform:uppercase;}
+  .admin-form{margin-top:16px; padding-top:16px; border-top:1px dashed #ddd;}
+  .admin-form input, .admin-form select{width:100%; padding:10px; border:1px solid #ddd; border-radius:8px; margin-bottom:8px; font-family:'Manrope',sans-serif; font-size:13.5px;}
+  .admin-form .row2{display:grid; grid-template-columns:1fr 1fr; gap:8px;}
+  .admin-form button[type=submit]{background:var(--teal); color:#fff; border:none; padding:11px 18px; border-radius:8px; font-weight:700; cursor:pointer; font-size:12.5px; text-transform:uppercase;}
+  .admin-save{margin-top:16px; background:var(--navy); color:#fff; border:none; padding:12px 22px; border-radius:8px; font-weight:700; cursor:pointer; width:100%;}
+  .admin-msg{font-size:12px; margin-top:8px; color:#1EA972;}
+  .stat-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:6px;}
+  .stat-box{background:var(--sand); border-radius:10px; padding:16px;}
+  .stat-box b{display:block; font-family:'Fraunces',serif; font-size:26px; color:var(--teal);}
+  .stat-box span{font-size:11px; text-transform:uppercase; letter-spacing:0.04em; color:#7a8890;}
+  @media(max-width:420px){
+    .page{padding:46px 15px 46px;}
+    .avatar-wrap{width:112px; height:112px; margin-bottom:20px;}
+    h1{font-size:31px;}
+    .quick-actions{gap:8px; margin-bottom:34px;}
+    .qa-btn{padding:13px 7px; font-size:12px;}
+    .link-btn{padding:15px;}
+    .detail-overlay,.admin-overlay{padding:14px 10px;}
+    .detail-body{padding:20px 18px 23px;}
+    .admin-panel{padding:21px 16px;}
+  }
+
+  /* Luxury visual layer — preserves all content and interactions above. */
+  :root{--navy:#0a1b2a;--teal:#164b52;--aqua:#4bbcc3;--sand:#f4efe7;--gold:#b8954c;--ink:#14232b;}
+  body{background:linear-gradient(125deg,#f7f3ec 0%,#eee7dc 100%);}
+  .grain{opacity:.045;}
+  .atmosphere{height:600px;background:radial-gradient(ellipse 55% 38% at 50% -6%,rgba(184,149,76,.17),transparent 70%),radial-gradient(circle at 90% 21%,rgba(75,188,195,.12),transparent 46%);}
+  .page{max-width:600px;padding-top:78px;}
+  .page::before{content:'CURATED EGYPT ESCAPES';display:block;width:max-content;margin:0 auto 22px;padding:7px 12px;border:1px solid rgba(184,149,76,.45);border-radius:999px;color:#82672f;font:500 9px/1 'IBM Plex Mono',monospace;letter-spacing:.18em;}
+  .avatar-wrap{width:142px;height:142px;margin-bottom:27px;}
+  .avatar-ring{inset:-9px;background:conic-gradient(from 25deg,#b8954c,#f1d79c,#164b52,#4bbcc3,#b8954c);box-shadow:0 12px 34px rgba(10,27,42,.15);}
+  .avatar-ring::after{inset:4px;background:#f4efe7;}
+  .avatar{background:radial-gradient(circle at 32% 24%,#296b72,#0a1b2a 68%);box-shadow:0 20px 45px rgba(10,27,42,.34),inset 0 0 0 1px rgba(255,255,255,.16);}
+  h1{font-size:43px;letter-spacing:-.035em;margin-bottom:10px;text-shadow:0 1px 0 #fff;}
+  h1 em{color:#1a666d;}
+  h1 em::after{height:3px;bottom:0;background:linear-gradient(90deg,var(--gold),rgba(184,149,76,.08));}
+  .bio{font-size:14.5px;max-width:415px;color:#526068;}
+  .bio b{color:#164b52;}
+  .quick-actions{margin:31px 4px 51px;gap:12px;}
+  .qa-btn{border-radius:8px;padding:16px 12px;font-size:12px;letter-spacing:.08em;position:relative;overflow:hidden;}
+  .qa-primary{background:linear-gradient(135deg,#0a1b2a,#174c53);box-shadow:0 14px 28px rgba(10,27,42,.24);}
+  .qa-primary::after{content:'';position:absolute;inset:1px;border:1px solid rgba(255,255,255,.14);border-radius:7px;pointer-events:none;}
+  .qa-secondary{background:rgba(255,255,255,.62);border:1px solid rgba(184,149,76,.38);box-shadow:0 8px 22px rgba(10,27,42,.06);}
+  .section-label{margin:42px 2px 15px;color:#8d7136;font-size:10px;letter-spacing:.16em;}
+  .section-label::after{background:linear-gradient(90deg,rgba(184,149,76,.55),transparent);}
+  .link-btn{position:relative;overflow:hidden;background:rgba(255,255,255,.76);border:1px solid rgba(184,149,76,.23);border-left:0;border-radius:10px;padding:18px 48px 18px 20px;margin-bottom:12px;box-shadow:0 9px 24px rgba(10,27,42,.055);}
+  .link-btn::after{content:'↗';position:absolute;right:17px;top:50%;transform:translateY(-50%);width:27px;height:27px;border-radius:50%;border:1px solid rgba(184,149,76,.55);color:#9b7a3a;display:grid;place-items:center;font-size:14px;transition:.2s;}
+  .link-btn:hover{transform:translateY(-3px);box-shadow:0 18px 34px rgba(10,27,42,.12);border-color:rgba(184,149,76,.55);}
+  .link-btn:hover::after{background:#b8954c;color:#fff;border-color:#b8954c;}
+  .link-btn.accent{background:linear-gradient(120deg,#0a1b2a,#164b52);box-shadow:0 15px 30px rgba(10,27,42,.22);padding-top:20px;padding-bottom:20px;}
+  .private-cta{background:linear-gradient(125deg,#092034,#14616a);}
+  .link-btn.accent::after{color:#f3d996;border-color:rgba(243,217,150,.55);}
+  .link-btn.has-photo{padding:12px 48px 12px 14px;}
+  .lb-thumb{width:64px;height:64px;border-radius:7px;box-shadow:0 4px 12px rgba(10,27,42,.15);}
+  .lb-title{font-size:16px;letter-spacing:-.012em;}.lb-sub{font-size:10.8px;color:#7d827e;}.lb-badge{background:rgba(184,149,76,.15);color:#876b32;}
+  footer{margin-top:62px;padding:23px 0 3px;border-top:1px solid rgba(184,149,76,.25);}
+  .foot-brand{font-size:20px;letter-spacing:-.02em;}.foot-brand span{color:#b8954c;}
+  .detail-panel,.admin-panel{border-radius:12px;box-shadow:0 25px 80px rgba(0,0,0,.32);}
+  .detail-body h3{font-size:25px;letter-spacing:-.025em;}.detail-close{background:#0a1b2a;}
+  .featured-offer{background-image:url('assets/boshka-latest-offers.png');border:1px solid rgba(184,149,76,.45);}
+  @media(max-width:420px){.page{padding-top:53px}.page::before{font-size:8px;margin-bottom:18px}h1{font-size:36px}.avatar-wrap{width:120px;height:120px}.link-btn{padding-left:16px}.featured-offer{min-height:225px;margin-bottom:38px}.featured-copy{left:18px;bottom:18px}.featured-title{font-size:25px}.private-cta{padding-left:18px;min-height:125px}.private-cta .lb-title{font-size:21px}.private-panel{padding:27px 18px}.private-panel h3{font-size:26px}}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#trip-content">Skip to trips</a>
+<div class="grain"></div>
+
+<div class="atmosphere"></div>
+
+<div class="page">
+  <div class="avatar-wrap">
+    <div class="avatar-ring"></div>
+    <div class="avatar">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="28" cy="12" r="3" fill="#C9A24B"/>
+        <path d="M4 24c2.2 2.2 4.4 2.2 6.6 0s4.4-2.2 6.6 0 4.4 2.2 6.6 0 4.4-2.2 6.6 0" stroke="#F7F5EF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M4 30.5c2.2 2.2 4.4 2.2 6.6 0s4.4-2.2 6.6 0 4.4 2.2 6.6 0 4.4-2.2 6.6 0" stroke="#F7F5EF" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+      </svg>
+    </div>
+  </div>
+  <h1>Boshka <em>Trips</em></h1>
+  <p class="bio">Egypt travel, done properly. <b>Monthly group trips</b>, private getaways, and day-use escapes across Dahab, Sharm, Hurghada, Siwa & Fayoum.</p>
+  <p class="bio ar" lang="ar">سافر معانا، رحلة تستاهل تتحكى</p>
+
+  <div class="quick-actions" aria-label="Contact Boshka Trips">
+    <a href="https://wa.me/201067779492?text=Hi%20Boshka%20Trips%2C%20I%27d%20like%20to%20know%20more." class="qa-btn qa-primary" target="_blank">WhatsApp · واتساب</a>
+    <a href="tel:+201067779492" class="qa-btn qa-secondary">Call · اتصل</a>
+  </div>
+
+  <a class="featured-offer" href="#" onclick="openFeaturedOffer(); return false;" aria-label="Open latest offers PDF">
+    <span class="featured-copy"><span class="featured-kicker">Boshka Trips · New</span><span class="featured-title">Latest offers <span class="ar" lang="ar">تعاقدات بوشكا</span></span><span class="featured-note">Tap to view the latest deals and partnerships</span></span>
+  </a>
+
+  <div id="trip-content" class="section-label">This Month's Trips <span class="ar" lang="ar">· رحلات الشهر</span></div>
+  <div id="tripsList"></div>
+
+  <div class="section-label">Day Use Availability <span class="ar" lang="ar">· يوم كامل بلا مبيت</span></div>
+  <div id="dayuseList"></div>
+
+  <div class="section-label">Private Reservations <span class="ar" lang="ar">· رحلات خاصة</span></div>
+  <button type="button" class="link-btn accent private-cta" onclick="openPrivatePlanner()">
+    <span class="private-kicker">Made around you · رحلتك الخاصة</span>
+    <span class="lb-title">Build your private escape</span>
+    <span class="lb-sub">Choose a destination, trip length and group — then send us your complete request on WhatsApp.</span>
+  </button>
+
+  <footer>
+    <div class="foot-brand">Boshka <span>Trips</span></div>
+    <p>Bookings and questions via WhatsApp or call.</p>
+    <p class="ar" lang="ar" style="margin-top:-10px;">للحجز والاستفسار، واتساب أو اتصال</p>
+    <button onclick="openAdmin()">Manage content</button>
+  </footer>
+</div>
+
+<!-- ADMIN OVERLAY -->
+<div class="admin-overlay" id="adminOverlay" role="dialog" aria-modal="true" aria-labelledby="adminTitle">
+  <div class="admin-panel">
+    <button class="admin-close" onclick="closeAdmin()">&times;</button>
+    <h2 id="adminTitle">Manage site content</h2>
+    <div class="sub">Add or remove trips and day-use dates. Changes save instantly and update the live page for everyone.</div>
+    <div class="admin-tabs">
+      <div class="admin-tab active" onclick="switchTab('trips')" id="tab-trips">Trips</div>
+      <div class="admin-tab" onclick="switchTab('dayuse')" id="tab-dayuse">Day Use</div>
+      <div class="admin-tab" onclick="switchTab('offers')" id="tab-offers">Latest Offers</div>
+      <div class="admin-tab" onclick="switchTab('branding')" id="tab-branding">Branding</div>
+      <div class="admin-tab" onclick="switchTab('analytics')" id="tab-analytics">Analytics</div>
+    </div>
+
+    <div class="admin-tabpane active" id="pane-trips">
+      <div id="tripAdminList"></div>
+      <form class="admin-form" onsubmit="addTrip(event)">
+        <div class="row2">
+          <input type="text" id="t_month" placeholder="Month (e.g. August 2026)" required>
+          <input type="text" id="t_dest" placeholder="Destination (e.g. Dahab)" required>
+        </div>
+        <input type="text" id="t_title" placeholder="Trip title (e.g. Blue Hole Dive Weekend)" required>
+        <div class="row2">
+          <input type="text" id="t_price" placeholder="Price (e.g. 3,200 EGP)" required>
+          <input type="text" id="t_spots" placeholder="Spots left (e.g. 6 spots left)" required>
+        </div>
+        <label style="display:block; font-size:12px; color:#7a8890; margin-bottom:4px;">Trip photos (you can select several at once, or add more later)</label>
+        <input type="file" id="t_photo" accept="image/*" multiple style="margin-bottom:8px;">
+        <div id="photoPreviewRow" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
+        <label style="display:block; font-size:12px; color:#7a8890; margin-bottom:4px;">Itinerary, one line per day</label>
+        <textarea id="t_itinerary" rows="10" placeholder="Day 1: Arrive in Dahab, check into camp&#10;Day 2: Blue Hole diving, sunset at the lagoon&#10;Day 3: Free morning, head back to Cairo" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-family:'Manrope',sans-serif; font-size:13.5px; resize:vertical; min-height:200px; line-height:1.6;"></textarea>
+        <label style="display:block; font-size:12px; color:#7a8890; margin-bottom:4px;">Full itinerary PDF (optional)</label>
+        <input type="file" id="t_pdf" accept="application/pdf" style="margin-bottom:6px;">
+        <div style="font-size:11px; color:#8a97a0; margin-bottom:10px;">Hard ceiling is about 3.5MB, since PDFs are stored directly on the page. If your Google Drive export is bigger, compress it first at ilovepdf.com/compress_pdf, it usually shrinks a lot with no visible quality loss.</div>
+        <div id="t_pdf_status" style="font-size:11.5px; color:#1EA972; margin:-6px 0 10px; display:none;">A PDF is already attached to this trip. Choose a new file to replace it.</div>
+        <button type="submit">Add trip</button>
+      </form>
+    </div>
+
+    <div class="admin-tabpane" id="pane-dayuse">
+      <div id="dayuseAdminList"></div>
+      <form class="admin-form" onsubmit="addDayUse(event)">
+        <div class="row2">
+          <input type="text" id="d_date" placeholder="Date (e.g. Aug 14, 2026)" required>
+          <input type="text" id="d_dest" placeholder="Destination" required>
+        </div>
+        <input type="text" id="d_spot" placeholder="Spot name (e.g. Ranch Lagoon)" required>
+        <select id="d_status">
+          <option value="open">Open</option>
+          <option value="limited">Limited</option>
+          <option value="full">Full</option>
+        </select>
+        <label style="display:block; font-size:12px; color:#7a8890; margin-bottom:4px;">Photos (you can select several at once, or add more later)</label>
+        <input type="file" id="d_photo" accept="image/*" multiple style="margin-bottom:8px;">
+        <div id="dayusePhotoPreviewRow" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:10px;"></div>
+        <label style="display:block; font-size:12px; color:#7a8890; margin-bottom:4px;">Details, one line per point</label>
+        <textarea id="d_itinerary" rows="8" placeholder="Check-in: 9am, checkout 6pm&#10;Includes: sunbeds, towels, pool access&#10;Lunch available on-site, not included" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; margin-bottom:10px; font-family:'Manrope',sans-serif; font-size:13.5px; resize:vertical; min-height:160px; line-height:1.6;"></textarea>
+        <label style="display:block; font-size:12px; color:#7a8890; margin-bottom:4px;">Info PDF (optional)</label>
+        <input type="file" id="d_pdf" accept="application/pdf" style="margin-bottom:6px;">
+        <div style="font-size:11px; color:#8a97a0; margin-bottom:10px;">Hard ceiling is about 3.5MB. Compress large PDFs first at ilovepdf.com/compress_pdf.</div>
+        <div id="d_pdf_status" style="font-size:11.5px; color:#1EA972; margin:-6px 0 10px; display:none;">A PDF is already attached to this date. Choose a new file to replace it.</div>
+        <button type="submit">Add day-use date</button>
+      </form>
+    </div>
+
+    <div class="admin-tabpane" id="pane-offers">
+      <p class="sub">Upload the current “Latest Offers · تعاقدات بوشكا” PDF. Replacing it here updates the featured card for visitors.</p>
+      <div class="admin-form" style="margin-top:0;">
+        <label style="display:block; font-size:12px; color:#7a8890; margin-bottom:6px;">Latest offers PDF</label>
+        <input type="file" id="offers_pdf" accept="application/pdf" style="margin-bottom:6px;">
+        <div style="font-size:11px; color:#8a97a0; margin-bottom:12px;">Keep the file below 3.5MB for reliable loading on phones.</div>
+        <button type="button" onclick="saveOffersPdf()">Save latest offers PDF</button>
+        <div class="admin-msg" id="offersPdfMsg"></div>
+      </div>
+    </div>
+
+    <div class="admin-tabpane" id="pane-branding">
+      <p class="sub">Upload a logo to replace the default icon in the circle at the top of the page. Square images with a transparent background work best.</p>
+      <div id="logoPreviewBox" style="width:96px; height:96px; border-radius:50%; background:var(--navy); display:flex; align-items:center; justify-content:center; margin-bottom:14px; overflow:hidden; box-shadow:0 8px 20px rgba(11,41,66,0.2);"></div>
+      <input type="file" id="logo_file" accept="image/*" style="margin-bottom:10px;">
+      <div style="display:flex; gap:8px;">
+        <button type="button" onclick="saveLogo()">Save logo</button>
+        <button type="button" style="background:#C24A4A;" onclick="resetLogo()">Remove logo</button>
+      </div>
+      <div class="admin-msg" id="logoMsg"></div>
+    </div>
+
+    <div class="admin-tabpane" id="pane-analytics">
+      <div class="stat-grid" id="analyticsGrid">
+        <div class="stat-box"><b id="statViews">-</b><span>Page Views</span></div>
+        <div class="stat-box"><b id="statTrips">-</b><span>Trip Clicks</span></div>
+        <div class="stat-box"><b id="statDayuse">-</b><span>Day Use Clicks</span></div>
+        <div class="stat-box"><b id="statPrivate">-</b><span>Private Clicks</span></div>
+      </div>
+      <button type="button" class="admin-save" onclick="loadAnalytics()">Refresh numbers</button>
+    </div>
+
+    <button class="admin-save" onclick="saveData()">Save changes to live page</button>
+    <div class="admin-msg" id="adminMsg"></div>
+  </div>
+</div>
+
+<!-- TRIP DETAIL MODAL -->
+<div class="detail-overlay" id="detailOverlay" role="dialog" aria-modal="true" aria-label="Trip details">
+  <div class="detail-panel" id="detailPanel"></div>
+</div>
+
+<div class="private-overlay" id="privateOverlay" role="dialog" aria-modal="true" aria-labelledby="privateTitle">
+  <div class="private-panel">
+    <button class="private-close" type="button" onclick="closePrivatePlanner()" aria-label="Close">&times;</button>
+    <p class="section-label" style="margin:0 0 10px;">Private reservations</p>
+    <h3 id="privateTitle">Design your<br><em>own escape.</em></h3>
+    <p class="private-intro">Tell us the essentials. We’ll take the complete request from there.</p>
+    <form class="private-form" onsubmit="sendPrivateRequest(event)">
+      <label>Destination<select id="privateDestination" required><option value="">Choose your destination</option><option value="Dahab">Dahab</option><option value="Sharm El Sheikh">Sharm El Sheikh</option><option value="Hurghada">Hurghada</option><option value="Siwa Oasis">Siwa Oasis</option><option value="Fayoum">Fayoum</option></select></label>
+      <label>Your budget range per person (EGP)<input id="privateBudget" type="text" inputmode="numeric" placeholder="e.g. 3,000 – 5,000 EGP" required></label>
+      <label>How many days?<input id="privateDays" type="number" min="1" max="14" inputmode="numeric" placeholder="e.g. 3" required></label>
+      <label>How many travellers?<input id="privateGuests" type="number" min="1" max="40" inputmode="numeric" placeholder="e.g. 4" required></label>
+      <label>Preferred departure date<input id="privateDate" type="date" required></label>
+      <button class="private-submit" type="submit">Continue on WhatsApp <span>↗</span></button>
+    </form>
+  </div>
+</div>
+
+<script>
+const WA = "201067779492";
+let data = { trips: [], dayuse: [] };
+
+/* Supports both the original hosted environment and an ordinary static page. */
+const siteStorage = window.storage ? window.storage : {
+  async get(key){ const value = localStorage.getItem(key); return value === null ? null : {value}; },
+  async set(key, value){ localStorage.setItem(key, value); },
+  async delete(key){ localStorage.removeItem(key); }
+};
+
+const defaultData = {
+  trips: [
+    {id:"t1", month:"August 2026", dest:"Dahab", title:"Blue Hole Dive Weekend", price:"3,200 EGP", spots:"6 spots left", photos:[], itinerary:"Day 1: Arrive in Dahab, check into camp\nDay 2: Guided Blue Hole and Canyon dives\nDay 3: Free morning, head back to Cairo", hasPdf:false},
+    {id:"t2", month:"August 2026", dest:"Siwa", title:"Siwa Oasis Escape", price:"4,500 EGP", spots:"4 spots left", photos:[], itinerary:"Day 1: Drive to Siwa, evening at the springs\nDay 2: Salt lakes and Great Sand Sea safari\nDay 3: Camp night under the stars, drive back", hasPdf:false},
+    {id:"t3", month:"September 2026", dest:"Fayoum", title:"Wadi El Rayan Day Trip", price:"1,400 EGP", spots:"10 spots left", photos:[], itinerary:"Morning: Depart Cairo for Wadi El Rayan\nAfternoon: Waterfalls and sandboarding\nEvening: Sunset at Magic Lake, drive back", hasPdf:false}
+  ],
+  dayuse: [
+    {id:"d1", date:"Aug 2, 2026", dest:"Hurghada", spot:"Sahl Hasheesh Beach Club", status:"open", photos:[], itinerary:"", hasPdf:false},
+    {id:"d2", date:"Aug 9, 2026", dest:"Dahab", spot:"Lighthouse Reef Lagoon", status:"limited", photos:[], itinerary:"", hasPdf:false},
+    {id:"d3", date:"Aug 16, 2026", dest:"Sharm El Sheikh", spot:"Ras Um Sid Reef Club", status:"full", photos:[], itinerary:"", hasPdf:false}
+  ]
+};
+
+function resizeLogo(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 400;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/png'));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function applyLogo(dataUrl){
+  const box = document.querySelector('.avatar');
+  if(!box) return;
+  if(dataUrl){
+    box.innerHTML = `<img src="${dataUrl}" alt="Boshka Trips logo" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+  } else {
+    box.innerHTML = `<svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="28" cy="12" r="3" fill="#C9A24B"/>
+        <path d="M4 24c2.2 2.2 4.4 2.2 6.6 0s4.4-2.2 6.6 0 4.4 2.2 6.6 0 4.4-2.2 6.6 0" stroke="#F7F5EF" stroke-width="2" stroke-linecap="round"/>
+        <path d="M4 30.5c2.2 2.2 4.4 2.2 6.6 0s4.4-2.2 6.6 0 4.4 2.2 6.6 0 4.4-2.2 6.6 0" stroke="#F7F5EF" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+      </svg>`;
+  }
+}
+
+async function loadLogo(){
+  try{
+    const res = await siteStorage.get('site-logo', true);
+    applyLogo(res && res.value ? res.value : null);
+  }catch(e){
+    applyLogo(null);
+  }
+}
+
+async function refreshLogoPreview(){
+  const box = document.getElementById('logoPreviewBox');
+  try{
+    const res = await siteStorage.get('site-logo', true);
+    box.innerHTML = res && res.value ? `<img src="${res.value}" style="width:100%; height:100%; object-fit:cover;">` : `<span style="color:#F7F5EF; font-size:10px; text-align:center; padding:4px;">No logo yet</span>`;
+  }catch(e){
+    box.innerHTML = `<span style="color:#F7F5EF; font-size:10px;">No logo yet</span>`;
+  }
+}
+
+async function saveLogo(){
+  const input = document.getElementById('logo_file');
+  const msg = document.getElementById('logoMsg');
+  const file = input.files && input.files[0];
+  if(!file){ msg.textContent = 'Choose an image first.'; return; }
+  try{
+    const dataUrl = await resizeLogo(file);
+    await siteStorage.set('site-logo', dataUrl, true);
+    applyLogo(dataUrl);
+    refreshLogoPreview();
+    input.value = '';
+    msg.textContent = 'Logo saved and live.';
+  }catch(e){
+    msg.textContent = 'Could not save the logo, please try again.';
+  }
+  setTimeout(()=> msg.textContent = '', 3000);
+}
+
+async function resetLogo(){
+  const msg = document.getElementById('logoMsg');
+  try{
+    await siteStorage.delete('site-logo', true);
+    applyLogo(null);
+    refreshLogoPreview();
+    msg.textContent = 'Logo removed, back to the default icon.';
+  }catch(e){
+    msg.textContent = 'Could not remove the logo, please try again.';
+  }
+  setTimeout(()=> msg.textContent = '', 3000);
+}
+
+async function loadData(){
+  try{
+    const res = await siteStorage.get('site-data', true);
+    data = res && res.value ? JSON.parse(res.value) : defaultData;
+  }catch(e){
+    data = defaultData;
+  }
+  render();
+  trackView();
+}
+
+function render(){
+  const tl = document.getElementById('tripsList');
+  tl.innerHTML = data.trips.map(t => {
+    const cover = t.photos && t.photos[0];
+    return `
+    <a class="link-btn ${cover ? 'has-photo' : ''}" onclick="openDetail('trip','${t.id}'); return false;" href="#">
+      ${cover ? `<div class="lb-thumb" style="background-image:url('${cover}')"></div>` : ''}
+      <span class="lb-text">
+        <span class="lb-title">${t.title}</span>
+        <span class="lb-sub">${t.dest} · ${t.month} · ${t.price} · ${t.spots}</span>
+      </span>
+    </a>`;
+  }).join('') || '<p class="empty-note">No trips posted yet. Check back soon.</p>';
+
+  const dl = document.getElementById('dayuseList');
+  const statusLabel = {open:'Open', limited:'Limited', full:'Full'};
+  dl.innerHTML = data.dayuse.map(d => {
+    const cover = d.photos && d.photos[0];
+    return `
+    <a class="link-btn ${cover ? 'has-photo' : ''}" onclick="openDetail('dayuse','${d.id}'); return false;" href="#">
+      ${cover ? `<div class="lb-thumb" style="background-image:url('${cover}')"></div>` : ''}
+      <span class="lb-text">
+        <span class="lb-title">${d.spot}<span class="lb-badge ${d.status}">${statusLabel[d.status]||d.status}</span></span>
+        <span class="lb-sub">${d.dest} · ${d.date}</span>
+      </span>
+    </a>`;
+  }).join('') || '<p class="empty-note">No day-use dates posted yet.</p>';
+
+  renderAdminLists();
+}
+
+function renderAdminLists(){
+  document.getElementById('tripAdminList').innerHTML = data.trips.map(t => `
+    <div class="admin-item"><span>${t.month}: ${t.title} (${t.dest})${(t.photos&&t.photos.length)?' 📷'+t.photos.length:''}${t.hasPdf?' 📄':''}</span><span style="display:flex; gap:6px;"><button style="background:var(--teal);" onclick="editTrip('${t.id}')">Edit</button><button onclick="removeTrip('${t.id}')">Remove</button></span></div>`).join('');
+  document.getElementById('dayuseAdminList').innerHTML = data.dayuse.map(d => `
+    <div class="admin-item"><span>${d.date}: ${d.spot} (${d.status})${(d.photos&&d.photos.length)?' 📷'+d.photos.length:''}${d.hasPdf?' 📄':''}</span><span style="display:flex; gap:6px;"><button style="background:var(--teal);" onclick="editDayUse('${d.id}')">Edit</button><button onclick="removeDayUse('${d.id}')">Remove</button></span></div>`).join('');
+}
+
+function itineraryToHtml(text){
+  const lines = (text||'').split('\n').map(l => l.trim()).filter(Boolean);
+  if(!lines.length) return '';
+  return `<ul class="detail-itin">${lines.map(l => {
+    const m = l.match(/^(Day\s*\d+|Morning|Afternoon|Evening|Check-in|Checkout|Check-out|Includes)\s*:\s*(.*)$/i);
+    return m ? `<li><span class="di-day mono">${m[1]}</span><span>${m[2]}</span></li>` : `<li><span>${l}</span></li>`;
+  }).join('')}</ul>`;
+}
+
+function openDetail(type, id){
+  const list = type === 'trip' ? data.trips : data.dayuse;
+  const item = list.find(x => x.id === id);
+  if(!item) return;
+  trackClick(type === 'trip' ? 'trips' : 'dayuse');
+
+  const photos = item.photos || [];
+  const galleryHtml = photos.length
+    ? `<div class="detail-gallery">${photos.map(p => `<img src="${p}" loading="lazy">`).join('')}</div>`
+    : `<div class="detail-gallery empty"><button class="detail-close" onclick="closeDetail()">&times;</button></div>`;
+  const closeBtn = photos.length ? `<button class="detail-close" style="position:absolute; top:12px; right:12px;" onclick="closeDetail()">&times;</button>` : '';
+
+  const title = type === 'trip' ? item.title : item.spot;
+  const sub = type === 'trip'
+    ? `${item.dest} · ${item.month} · ${item.price} · ${item.spots}`
+    : `${item.dest} · ${item.date}`;
+  const waText = type === 'trip'
+    ? `Hi, I'd like to book: ${item.title} (${item.month})`
+    : `Hi, I'd like day use at: ${item.spot} on ${item.date}`;
+  const pdfPrefix = type === 'trip' ? 'trip-pdf:' : 'dayuse-pdf:';
+
+  document.getElementById('detailPanel').innerHTML = `
+    <div style="position:relative;">${galleryHtml}${photos.length ? closeBtn : ''}</div>
+    <div class="detail-body">
+      <h3>${title}</h3>
+      <div class="dsub">${sub}</div>
+      ${itineraryToHtml(item.itinerary)}
+      ${item.hasPdf ? `<button type="button" class="link-btn" style="margin:0 0 10px; cursor:pointer; border:1px solid var(--teal); background:#fff; width:100%; text-align:left;" onclick="viewPdf('${pdfPrefix}','${item.id}')">
+        <span class="lb-title" style="color:var(--teal);">Full Details (PDF) ↗</span>
+      </button>` : ''}
+      <a class="link-btn accent" target="_blank" style="margin:0;" onclick="trackClick('${type === 'trip' ? 'trips' : 'dayuse'}')"
+         href="https://wa.me/${WA}?text=${encodeURIComponent(waText)}">
+        <span class="lb-title">Book via WhatsApp →</span>
+      </a>
+    </div>`;
+  document.getElementById('detailOverlay').classList.add('open');
+}
+function closeDetail(){ document.getElementById('detailOverlay').classList.remove('open'); }
+
+function openPrivatePlanner(){ document.getElementById('privateOverlay').classList.add('open'); }
+function closePrivatePlanner(){ document.getElementById('privateOverlay').classList.remove('open'); }
+function sendPrivateRequest(event){
+  event.preventDefault();
+  const destination = document.getElementById('privateDestination').value;
+  const budget = document.getElementById('privateBudget').value;
+  const days = document.getElementById('privateDays').value;
+  const guests = document.getElementById('privateGuests').value;
+  const date = document.getElementById('privateDate').value;
+  const message = `Hi Boshka Trips, I would like a private trip quote.%0A%0ADestination: ${destination}%0ABudget per person: ${budget}%0ATrip length: ${days} day(s)%0ATravellers: ${guests}%0APreferred departure: ${date}%0A%0APlease share the best available plan.`;
+  trackClick('private');
+  window.open(`https://wa.me/${WA}?text=${message}`, '_blank');
+}
+
+async function viewPdf(prefix, id){
+  try{
+    const res = await siteStorage.get(prefix+id, true);
+    if(!res || !res.value){ alert('No PDF found.'); return; }
+    const blob = await (await fetch(res.value)).blob();
+    const url = URL.createObjectURL(blob);
+    window.open(url, '_blank');
+  }catch(e){
+    alert('Could not load the PDF, please try again.');
+  }
+}
+
+async function openFeaturedOffer(){
+  try{
+    const res = await siteStorage.get('latest-offers-pdf', true);
+    if(!res || !res.value){ alert('The latest offers PDF will be available soon.'); return; }
+    const blob = await (await fetch(res.value)).blob();
+    window.open(URL.createObjectURL(blob), '_blank');
+  }catch(e){ alert('Could not load the latest offers. Please try again.'); }
+}
+
+async function saveOffersPdf(){
+  const input = document.getElementById('offers_pdf');
+  const msg = document.getElementById('offersPdfMsg');
+  const file = input.files && input.files[0];
+  if(!file){ msg.textContent = 'Choose a PDF first.'; return; }
+  if(file.size > PDF_LIMIT){ msg.textContent = 'That PDF is over 3.5MB. Please compress it and try again.'; return; }
+  try{
+    await siteStorage.set('latest-offers-pdf', await readFileAsDataURL(file), true);
+    input.value = '';
+    msg.textContent = 'Latest offers PDF saved and live.';
+  }catch(e){ msg.textContent = 'Could not save the PDF. Please try again.'; }
+}
+
+function resizeImage(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 900;
+        const scale = Math.min(1, maxW / img.width);
+        const canvas = document.createElement('canvas');
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.72));
+      };
+      img.onerror = reject;
+      img.src = e.target.result;
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+function readFileAsDataURL(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+function removeTrip(id){
+  data.trips = data.trips.filter(t => t.id !== id);
+  siteStorage.delete('trip-pdf:'+id, true).catch(()=>{});
+  render();
+}
+function removeDayUse(id){
+  data.dayuse = data.dayuse.filter(d => d.id !== id);
+  siteStorage.delete('dayuse-pdf:'+id, true).catch(()=>{});
+  render();
+}
+
+let editingTripId = null;
+let editingPhotos = [];
+
+function renderPhotoPreview(){
+  const row = document.getElementById('photoPreviewRow');
+  row.innerHTML = editingPhotos.map((p,i) => `
+    <div style="position:relative; width:56px; height:56px;">
+      <div style="width:100%; height:100%; border-radius:8px; background-image:url('${p}'); background-size:cover; background-position:center;"></div>
+      <button type="button" onclick="removeEditingPhoto(${i})" style="position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:#C24A4A; color:#fff; border:none; font-size:12px; cursor:pointer; line-height:1;">&times;</button>
+    </div>`).join('');
+}
+function removeEditingPhoto(i){ editingPhotos.splice(i,1); renderPhotoPreview(); }
+
+document.getElementById('t_photo').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  for(const f of files){
+    try{ editingPhotos.push(await resizeImage(f)); }catch(err){ /* skip failed file */ }
+  }
+  renderPhotoPreview();
+  e.target.value = '';
+});
+
+function editTrip(id){
+  const t = data.trips.find(x => x.id === id);
+  if(!t) return;
+  editingTripId = id;
+  editingPhotos = [...(t.photos||[])];
+  renderPhotoPreview();
+  document.getElementById('t_month').value = t.month;
+  document.getElementById('t_dest').value = t.dest;
+  document.getElementById('t_title').value = t.title;
+  document.getElementById('t_price').value = t.price;
+  document.getElementById('t_spots').value = t.spots;
+  document.getElementById('t_itinerary').value = t.itinerary || '';
+  document.getElementById('t_pdf_status').style.display = t.hasPdf ? 'block' : 'none';
+  document.querySelector('#pane-trips .admin-form button[type=submit]').textContent = 'Save changes';
+  document.getElementById('t_title').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+const PDF_LIMIT = 3.5 * 1024 * 1024;
+
+async function addTrip(e){
+  e.preventDefault();
+  const pdfInput = document.getElementById('t_pdf');
+  const tripId = editingTripId || ('t'+Date.now());
+  let hasPdf = editingTripId ? !!((data.trips.find(x => x.id === editingTripId)||{}).hasPdf) : false;
+
+  if(pdfInput.files && pdfInput.files[0]){
+    const file = pdfInput.files[0];
+    if(file.size > PDF_LIMIT){
+      alert("That PDF is over the 3.5MB limit and won't save. Please compress it (try ilovepdf.com/compress_pdf) and upload again.");
+    } else {
+      try{
+        const dataUrl = await readFileAsDataURL(file);
+        await siteStorage.set('trip-pdf:'+tripId, dataUrl, true);
+        hasPdf = true;
+      }catch(err){
+        alert("Could not upload the PDF, please try again.");
+      }
+    }
+  }
+
+  const tripData = {
+    month: document.getElementById('t_month').value,
+    dest: document.getElementById('t_dest').value,
+    title: document.getElementById('t_title').value,
+    price: document.getElementById('t_price').value,
+    spots: document.getElementById('t_spots').value,
+    photos: [...editingPhotos],
+    itinerary: document.getElementById('t_itinerary').value,
+    hasPdf: hasPdf
+  };
+  if(editingTripId){
+    const idx = data.trips.findIndex(x => x.id === editingTripId);
+    if(idx > -1) data.trips[idx] = {...data.trips[idx], ...tripData};
+    editingTripId = null;
+    document.querySelector('#pane-trips .admin-form button[type=submit]').textContent = 'Add trip';
+  } else {
+    data.trips.push({ id: tripId, ...tripData });
+  }
+  editingPhotos = [];
+  renderPhotoPreview();
+  document.getElementById('t_pdf_status').style.display = 'none';
+  e.target.reset();
+  render();
+}
+
+let editingDayUseId = null;
+let editingDayUsePhotos = [];
+
+function renderDayUsePhotoPreview(){
+  const row = document.getElementById('dayusePhotoPreviewRow');
+  row.innerHTML = editingDayUsePhotos.map((p,i) => `
+    <div style="position:relative; width:56px; height:56px;">
+      <div style="width:100%; height:100%; border-radius:8px; background-image:url('${p}'); background-size:cover; background-position:center;"></div>
+      <button type="button" onclick="removeEditingDayUsePhoto(${i})" style="position:absolute; top:-6px; right:-6px; width:20px; height:20px; border-radius:50%; background:#C24A4A; color:#fff; border:none; font-size:12px; cursor:pointer; line-height:1;">&times;</button>
+    </div>`).join('');
+}
+function removeEditingDayUsePhoto(i){ editingDayUsePhotos.splice(i,1); renderDayUsePhotoPreview(); }
+
+document.getElementById('d_photo').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  for(const f of files){
+    try{ editingDayUsePhotos.push(await resizeImage(f)); }catch(err){ /* skip failed file */ }
+  }
+  renderDayUsePhotoPreview();
+  e.target.value = '';
+});
+
+function editDayUse(id){
+  const d = data.dayuse.find(x => x.id === id);
+  if(!d) return;
+  editingDayUseId = id;
+  editingDayUsePhotos = [...(d.photos||[])];
+  renderDayUsePhotoPreview();
+  document.getElementById('d_date').value = d.date;
+  document.getElementById('d_dest').value = d.dest;
+  document.getElementById('d_spot').value = d.spot;
+  document.getElementById('d_status').value = d.status;
+  document.getElementById('d_itinerary').value = d.itinerary || '';
+  document.getElementById('d_pdf_status').style.display = d.hasPdf ? 'block' : 'none';
+  document.querySelector('#pane-dayuse .admin-form button[type=submit]').textContent = 'Save changes';
+  document.getElementById('d_spot').scrollIntoView({behavior:'smooth', block:'center'});
+}
+
+async function addDayUse(e){
+  e.preventDefault();
+  const pdfInput = document.getElementById('d_pdf');
+  const dayId = editingDayUseId || ('d'+Date.now());
+  let hasPdf = editingDayUseId ? !!((data.dayuse.find(x => x.id === editingDayUseId)||{}).hasPdf) : false;
+
+  if(pdfInput.files && pdfInput.files[0]){
+    const file = pdfInput.files[0];
+    if(file.size > PDF_LIMIT){
+      alert("That PDF is over the 3.5MB limit and won't save. Please compress it (try ilovepdf.com/compress_pdf) and upload again.");
+    } else {
+      try{
+        const dataUrl = await readFileAsDataURL(file);
+        await siteStorage.set('dayuse-pdf:'+dayId, dataUrl, true);
+        hasPdf = true;
+      }catch(err){
+        alert("Could not upload the PDF, please try again.");
+      }
+    }
+  }
+
+  const dayData = {
+    date: document.getElementById('d_date').value,
+    dest: document.getElementById('d_dest').value,
+    spot: document.getElementById('d_spot').value,
+    status: document.getElementById('d_status').value,
+    photos: [...editingDayUsePhotos],
+    itinerary: document.getElementById('d_itinerary').value,
+    hasPdf: hasPdf
+  };
+  if(editingDayUseId){
+    const idx = data.dayuse.findIndex(x => x.id === editingDayUseId);
+    if(idx > -1) data.dayuse[idx] = {...data.dayuse[idx], ...dayData};
+    editingDayUseId = null;
+    document.querySelector('#pane-dayuse .admin-form button[type=submit]').textContent = 'Add day-use date';
+  } else {
+    data.dayuse.push({ id: dayId, ...dayData });
+  }
+  editingDayUsePhotos = [];
+  renderDayUsePhotoPreview();
+  document.getElementById('d_pdf_status').style.display = 'none';
+  e.target.reset();
+  render();
+}
+
+async function saveData(){
+  const msg = document.getElementById('adminMsg');
+  try{
+    await siteStorage.set('site-data', JSON.stringify(data), true);
+    msg.textContent = "Saved. Live page updated.";
+  }catch(e){
+    msg.textContent = "Save failed, please try again.";
+  }
+  setTimeout(()=> msg.textContent = '', 3000);
+}
+
+/* ANALYTICS */
+const defaultAnalytics = { views:0, trips:0, dayuse:0, private:0 };
+async function trackView(){
+  try{
+    const res = await siteStorage.get('analytics', true);
+    const a = res && res.value ? JSON.parse(res.value) : {...defaultAnalytics};
+    a.views = (a.views||0) + 1;
+    await siteStorage.set('analytics', JSON.stringify(a), true);
+  }catch(e){}
+}
+async function trackClick(section){
+  try{
+    const res = await siteStorage.get('analytics', true);
+    const a = res && res.value ? JSON.parse(res.value) : {...defaultAnalytics};
+    a[section] = (a[section]||0) + 1;
+    await siteStorage.set('analytics', JSON.stringify(a), true);
+  }catch(e){}
+}
+async function loadAnalytics(){
+  try{
+    const res = await siteStorage.get('analytics', true);
+    const a = res && res.value ? JSON.parse(res.value) : {...defaultAnalytics};
+    document.getElementById('statViews').textContent = a.views||0;
+    document.getElementById('statTrips').textContent = a.trips||0;
+    document.getElementById('statDayuse').textContent = a.dayuse||0;
+    document.getElementById('statPrivate').textContent = a.private||0;
+  }catch(e){
+    document.getElementById('statViews').textContent = '0';
+    document.getElementById('statTrips').textContent = '0';
+    document.getElementById('statDayuse').textContent = '0';
+    document.getElementById('statPrivate').textContent = '0';
+  }
+}
+
+function openAdmin(){
+  const pass = prompt("Enter the content editor password:");
+  if(pass === "boshka2026"){
+    document.getElementById('adminOverlay').classList.add('open');
+    loadAnalytics();
+  } else if(pass !== null){
+    alert("Incorrect password.");
+  }
+}
+function closeAdmin(){ document.getElementById('adminOverlay').classList.remove('open'); }
+function switchTab(name){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.admin-tabpane').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('pane-'+name).classList.add('active');
+  if(name === 'analytics') loadAnalytics();
+  if(name === 'branding') refreshLogoPreview();
+}
+
+loadData();
+loadLogo();
+document.addEventListener('keydown', (event) => {
+  if(event.key === 'Escape'){
+    closeDetail();
+    closeAdmin();
+    closePrivatePlanner();
+  }
+});
+</script>
+</body>
+</html>
